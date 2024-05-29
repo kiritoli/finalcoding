@@ -125,17 +125,18 @@ function drawLines(){
   for (let hp of hps) {
     drawLine(hp[0], hp[1], hp[2], hp[3],yellow);
   }
+}
 
 
+function drawRectangle(x1, y1, x2, y2, color) {
+  fill(color);
+  noStroke();
+  let width = (x2 - x1) * (canvasSize / gridSize);
+  let height = (y2 - y1) * (canvasSize / gridSize);
+  rect(x1 * (canvasSize / gridSize), y1 * (canvasSize / gridSize), width, height);
+}
 
-  function drawRectangle(x1, y1, x2, y2, color) {
-    fill(color);
-    noStroke();
-    let width = (x2 - x1) * (canvasSize / gridSize);
-    let height = (y2 - y1) * (canvasSize / gridSize);
-    rect(x1 * (canvasSize / gridSize), y1 * (canvasSize / gridSize), width, height);
-  }
-  
+function drawRectangles() {
   let rectangles = [
     // [Upper left corner x, upper left corner y, lower right corner x, lower right corner y, color]
     [7, 3, 11, 5, yellow],
@@ -176,7 +177,9 @@ function drawLines(){
     for (let rect of rectangles) {
       drawRectangle(rect[0], rect[1], rect[2], rect[3], rect[4]);
     }
+}
 
+function drawSingleGrids() {
   //Single grid coloring - 0
   fillGrid(3,0,red);
   fillGrid(11,0,red);
@@ -522,11 +525,12 @@ function drawLines(){
   //Single grid coloring - (48~49)
   fillGrid(42,48,gray);
   
-  function draw() {
-    background(255);
-    drawGrid();
-    drawLines();
-    drawRectangles();
-  }  
-
 }
+
+function draw() {
+  background(255);
+  drawGrid();
+  drawLines();
+  drawRectangles();
+  drawSingleGrids();
+}  
