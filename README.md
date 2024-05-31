@@ -1,3 +1,2 @@
 # finalcoding
-Onnei's hand is good Chinese
-说的道理
+All the files in Main document
