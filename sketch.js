@@ -8,6 +8,7 @@ let blue = '#4B66C1'
 
 function setup() {
   createCanvas(canvasSize, canvasSize);
+  canvasSize = min(windowWidth, windowHeight);
   noLoop(); // Ensure draw() is called only once
 }
 
@@ -15,6 +16,8 @@ function draw() {
   background(255);
   drawGrid();
   drawLines();
+  drawRectangles(); 
+  drawSingleGrids(); 
 }
 
 //  draw grid lines
@@ -28,28 +31,31 @@ function drawGrid() {
   }
 }
 
-// Get coordinates based on line segments
+// Get coordinates based on line segments,Calculate all grid cells that pass in a straight line from a starting point (x1, y1) to an ending point (x2, y2).
+// from chatgpt and https://stackoverflow.com/questions/4672279/bresenham-algorithm-in-javascript
 function getIntersectingGrids(x1, y1, x2, y2) {
   let intersectingGrids = [];
-  let x1Idx = x1;
-  let y1Idx = y1;
-  let x2Idx = x2;
-  let y2Idx = y2;
+  let x1Idx = x1;// Horizontal coordinate of the current point, initialized to the starting point x1
+  let y1Idx = y1;// Vertical coordinate of the current point, initialized to the starting point y1
+  let x2Idx = x2;// Horizontal coordinate of the end point
+  let y2Idx = y2;// the vertical coordinate of the end point
 
-  let dx = Math.abs(x2Idx - x1Idx);
-  let dy = Math.abs(y2Idx - y1Idx);
-  let sx = x1Idx < x2Idx ? 1 : -1;
-  let sy = y1Idx < y2Idx ? 1 : -1;
-  let err = dx - dy;
-
+  let dx = Math.abs(x2Idx - x1Idx); // Calculate the absolute value of the horizontal distance
+  let dy = Math.abs(y2Idx - y1Idx);// Calculate the absolute value of the vertical distance
+  let sx = x1Idx < x2Idx ? 1 : -1; // Determine the horizontal step direction, if x1 is less than x2 then the step is positive, otherwise it is negative
+  let sy = y1Idx < y2Idx ? 1 : -1;// Determine the vertical stepping direction, if y1 is less than y2 then the stepping is positive, otherwise it is negative
+  let err = dx - dy;// Initialize the error term, used to determine if the next point is a horizontal or vertical step
+// loop until it reaches the end point
   while (true) {
     intersectingGrids.push(`${x1Idx},${y1Idx}`);
-    if (x1Idx === x2Idx && y1Idx === y2Idx) break;
-    let e2 = err * 2;
+    if (x1Idx === x2Idx && y1Idx === y2Idx) break;// If the current point has reached the end, exit the loop.
+    let e2 = err * 2;// Calculate twice the error term, which is used to determine the next step direction
+    // if error term is greater than negative vertical distance
     if (e2 > -dy) {
       err -= dy;
       x1Idx += sx;
     }
+    // if error term is less than horizontal distance
     if (e2 < dx) {
       err += dx;
       y1Idx += sy;
@@ -61,23 +67,20 @@ function getIntersectingGrids(x1, y1, x2, y2) {
 
 // Fill in the grid
 function fillGrid(x, y, color) {
-  fill(color);
-  noStroke();
+  fill(color);//Fill Color
+  noStroke();//No stroke
   rect(x * (canvasSize / gridSize), y * (canvasSize / gridSize), canvasSize / gridSize, canvasSize / gridSize);
-}
+}//The xy coordinates are multiplied by the grid height and width.The height and width of each grid.
 
 //  Draw line
 function drawLine(x1, y1, x2, y2, color) {
   let intersectingGrids = getIntersectingGrids(x1, y1, x2, y2);
   for (let coord of intersectingGrids) {
-    let [x, y] = coord.split(',').map(Number);
+    let [x, y] = coord.split(',').map(Number);//// Split the coordinates of each grid cell (as a string) into [x, y] arrays and convert them to numbers
     fillGrid(x, y, color);
   }
 
-  // Auxiliary line
-  // stroke(0);
-  // strokeWeight(2);
-  // line(x1, y1, x2, y2);
+
 }
 
 function drawTestLine() {
@@ -90,17 +93,16 @@ function drawTestLine() {
 }
 
 function drawLines(){
-  // whole lines
+  // Draw the entire line
   let x1s = [3,6,11,26,42,48]
-  for (let i = 0; i < x1s.length; i++) {
-    drawLine(x1s[i], 0, x1s[i], 50, yellow);
+  for (let i = 0; i < x1s.length; i++) { // Define an array of x-coordinates for the start of the lines.
+    drawLine(x1s[i], 0, x1s[i], 50, yellow);// Draw a yellow vertical line from (x1s[i], 0) to (x1s[i], 50).
   }
   let y1s = [1,8,17,21,27,30,42,47,]
   for (let i = 0; i < y1s.length; i++) {
-    drawLine(0, y1s[i], 50, y1s[i], yellow);
+    drawLine(0, y1s[i], 50, y1s[i], yellow);// Draw a yellow line from (0, y1s[i]) to (50, y1s[i]).
   }
   // vertical partial lines
-  // let vps = [1,28,31,44,46];
   let vps = [
     [1,0,1,y1s[2]], 
     [28,0,28,y1s[2]], 
@@ -114,7 +116,7 @@ function drawLines(){
   for (let vp of vps) {
     drawLine(vp[0], vp[1], vp[2], vp[3],yellow);
   }
-
+  // Draw a partial horizontal line
   let hps = [
     [0,44,3,44],
     [0,38,3,38],
@@ -181,6 +183,7 @@ function drawRectangles() {
 
 function drawSingleGrids() {
   //Single grid coloring - 0
+  //[column, row, color]
   fillGrid(3,0,red);
   fillGrid(11,0,red);
   fillGrid(26,0,red);
@@ -527,10 +530,9 @@ function drawSingleGrids() {
   
 }
 
-function draw() {
-  background(255);
-  drawGrid();
-  drawLines();
-  drawRectangles();
-  drawSingleGrids();
-}  
+//  WindowResized
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  canvasSize = min(windowWidth, windowHeight);
+  draw(); 
+}
